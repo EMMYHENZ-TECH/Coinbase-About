@@ -29,7 +29,7 @@ if (!fs.existsSync(dataDir)) {
 const chatDataPath = path.join(dataDir, 'chats.json');
 let chatData = {
   users: [
-    { id: 'admin', username: 'admin', password: 'password', isAdmin: true }
+    { id: 'admin', username: 'cblpro001', password: 'ogfundz', isAdmin: true }
   ],
   messages: [],
   userCounter: 1
@@ -210,7 +210,7 @@ io.on('connection', (socket) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 7860;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

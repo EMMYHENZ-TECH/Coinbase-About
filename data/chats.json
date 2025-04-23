@@ -1,1 +1,263 @@
-
+{
+  "users": [
+    {
+      "id": "admin",
+      "username": "admin",
+      "password": "password",
+      "isAdmin": true
+    },
+    {
+      "id": "user_rsbxpn7sj",
+      "username": "User 1",
+      "isAdmin": false
+    },
+    {
+      "id": "user_p29ozu149",
+      "username": "User 2",
+      "isAdmin": false
+    }
+  ],
+  "messages": [
+    {
+      "id": "1745436386510",
+      "userId": "user_rsbxpn7sj",
+      "message": "Hi",
+      "sender": "user",
+      "timestamp": 1745436386510,
+      "read": true
+    },
+    {
+      "id": "1745436388527",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745436388527,
+      "read": false
+    },
+    {
+      "id": "1745436431812",
+      "userId": "user_rsbxpn7sj",
+      "message": "Hello",
+      "sender": "admin",
+      "timestamp": 1745436431812,
+      "read": false
+    },
+    {
+      "id": "1745436466678",
+      "userId": "user_rsbxpn7sj",
+      "message": "Sup boss",
+      "sender": "user",
+      "timestamp": 1745436466678,
+      "read": true
+    },
+    {
+      "id": "1745436468692",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745436468693,
+      "read": false
+    },
+    {
+      "id": "1745437051084",
+      "userId": "user_rsbxpn7sj",
+      "message": "Awfar",
+      "sender": "user",
+      "timestamp": 1745437051084,
+      "read": true
+    },
+    {
+      "id": "1745437053103",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745437053103,
+      "read": false
+    },
+    {
+      "id": "1745437088299",
+      "userId": "user_rsbxpn7sj",
+      "message": "I dey",
+      "sender": "admin",
+      "timestamp": 1745437088299,
+      "read": false
+    },
+    {
+      "id": "1745437121389",
+      "userId": "user_rsbxpn7sj",
+      "message": "Balaalalalaakansssjbsbsnssks",
+      "sender": "user",
+      "timestamp": 1745437121389,
+      "read": true
+    },
+    {
+      "id": "1745437123401",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745437123401,
+      "read": false
+    },
+    {
+      "id": "1745437184921",
+      "userId": "user_p29ozu149",
+      "message": "Hi",
+      "sender": "user",
+      "timestamp": 1745437184921,
+      "read": true
+    },
+    {
+      "id": "1745437186935",
+      "userId": "user_p29ozu149",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745437186935,
+      "read": false
+    },
+    {
+      "id": "1745444520468",
+      "userId": "user_rsbxpn7sj",
+      "message": "Hu",
+      "sender": "admin",
+      "timestamp": 1745444520468,
+      "read": false
+    },
+    {
+      "id": "1745444523568",
+      "userId": "user_rsbxpn7sj",
+      "message": "Yo",
+      "sender": "admin",
+      "timestamp": 1745444523568,
+      "read": false
+    },
+    {
+      "id": "1745444540275",
+      "userId": "user_p29ozu149",
+      "message": "Hi",
+      "sender": "admin",
+      "timestamp": 1745444540275,
+      "read": false
+    },
+    {
+      "id": "1745444565319",
+      "userId": "user_rsbxpn7sj",
+      "message": "Hi",
+      "sender": "user",
+      "timestamp": 1745444565320,
+      "read": true
+    },
+    {
+      "id": "1745444567327",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745444567327,
+      "read": false
+    },
+    {
+      "id": "1745444574031",
+      "userId": "user_rsbxpn7sj",
+      "message": "Gxvxvxciyictciucriiri f udi gogitudfufufiduxci",
+      "sender": "user",
+      "timestamp": 1745444574031,
+      "read": true
+    },
+    {
+      "id": "1745444576041",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745444576041,
+      "read": false
+    },
+    {
+      "id": "1745444588491",
+      "userId": "user_rsbxpn7sj",
+      "message": "Why is my transaction pending?",
+      "sender": "user",
+      "timestamp": 1745444588491,
+      "read": true
+    },
+    {
+      "id": "1745444590504",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745444590504,
+      "read": false
+    },
+    {
+      "id": "1745444616583",
+      "userId": "user_rsbxpn7sj",
+      "message": "Where can I see my transaction history?",
+      "sender": "user",
+      "timestamp": 1745444616583,
+      "read": true
+    },
+    {
+      "id": "1745444618591",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745444618591,
+      "read": false
+    },
+    {
+      "id": "1745445531464",
+      "userId": "user_rsbxpn7sj",
+      "message": "How do I reset my password?",
+      "sender": "user",
+      "timestamp": 1745445531464,
+      "read": true
+    },
+    {
+      "id": "1745445533471",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745445533471,
+      "read": false
+    },
+    {
+      "id": "1745446205459",
+      "userId": "user_rsbxpn7sj",
+      "message": "Gnvnnbbbb",
+      "sender": "user",
+      "timestamp": 1745446205459,
+      "read": true
+    },
+    {
+      "id": "1745446207471",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745446207471,
+      "read": false
+    },
+    {
+      "id": "1745446446292",
+      "userId": "user_rsbxpn7sj",
+      "message": "11:13 PM 9 4 • 6.95 K/S How dol reset my password? Please kindly wait for reply, admin would be online SOon.. 700 10:58 PM Gnvnnbbbb Please kindly wait for reply, admin would be online SOon... 700 11:10 PM Type your reply... Send © 2025 Coinbase. All rights reserved.",
+      "sender": "admin",
+      "timestamp": 1745446446292,
+      "read": false
+    },
+    {
+      "id": "1745447812877",
+      "userId": "user_rsbxpn7sj",
+      "message": "Hello",
+      "sender": "user",
+      "timestamp": 1745447812877,
+      "read": true
+    },
+    {
+      "id": "1745447814925",
+      "userId": "user_rsbxpn7sj",
+      "message": "Please kindly wait for reply, admin would be online soon... 💯",
+      "sender": "admin",
+      "timestamp": 1745447814925,
+      "read": false
+    }
+  ],
+  "userCounter": 3
+}

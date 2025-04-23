@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coinbase Admin Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header support-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="back-link" id="back-to-support">
+                    <a href="support.html"><i class="fas fa-arrow-left"></i></a>
+                </div>
+                <div class="back-link" id="back-to-chats" style="display: none;">
+                    <a href="#"><i class="fas fa-arrow-left"></i></a>
+                </div>
+                <div class="logo admin-logo">
+                    <h1 id="header-title">Admin Auth</h1>
+                </div>
+                <div class="logout-button" id="logout-button" style="display: none;">
+                    <a href="#" id="logout-link">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="container">
+            <!-- Login Form -->
+            <div id="login-container" class="login-container">
+                <h1>Admin Login</h1>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                    <p class="login-hint">Use username: **********, password: *************</p>
+                </form>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="admin-dashboard" class="admin-dashboard" style="display: none;">
+                <div class="dashboard-container">
+                    <!-- Chat Management -->
+                    <div class="chat-management">
+                        <!-- Sidebar -->
+                        <div class="chat-sidebar" id="chat-sidebar">
+                            <div class="search-container">
+                                <input type="text" id="search-input" placeholder="Search conversations...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="chat-list" id="chat-list">
+                                <!-- Chat list items will be added here dynamically -->
+                                <div class="no-chats-message">
+                                    <i class="fas fa-comments"></i>
+                                    <p>No active chats yet</p>
+                                    <p class="no-chats-hint">When users start conversations, they will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div class="chat-area" id="chat-area">
+                            <div class="no-chat-selected" id="no-chat-selected">
+                                <i class="fas fa-comments"></i>
+                                <h3>No conversation selected</h3>
+                                <p>Select a conversation from the sidebar to view messages</p>
+                            </div>
+
+                            <div class="active-chat" id="active-chat" style="display: none;">
+                                <div class="active-chat-header" id="active-chat-header">
+                                    <!-- Active chat header will be added here dynamically -->
+                                </div>
+
+                                <div class="active-chat-messages" id="active-chat-messages">
+                                    <!-- Active chat messages will be added here dynamically -->
+                                </div>
+
+                                <div class="active-chat-input">
+                                    <input type="text" id="admin-message-input" placeholder="Type your reply...">
+                                    <button id="admin-send-button" type="button"><i class="fas fa-paper-plane"></i> Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer support-footer">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> Coinbase. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // DOM Elements
+        const loginContainer = document.getElementById('login-container');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const loginForm = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const logoutButton = document.getElementById('logout-button');
+        const headerTitle = document.getElementById('header-title');
+        const chatList = document.getElementById('chat-list');
+        const noChatSelected = document.getElementById('no-chat-selected');
+        const activeChat = document.getElementById('active-chat');
+        const activeChatHeader = document.getElementById('active-chat-header');
+        const activeChatMessages = document.getElementById('active-chat-messages');
+        const adminMessageInput = document.getElementById('admin-message-input');
+        const adminSendButton = document.getElementById('admin-send-button');
+        const searchInput = document.getElementById('search-input');
+        const chatSidebar = document.getElementById('chat-sidebar');
+        const backToChats = document.getElementById('back-to-chats');
+        const backToSupport = document.getElementById('back-to-support');
+
+        // State
+        let isLoggedIn = false;
+        let activeUserId = null;
+        let socket = null;
+        let chats = [];
+        let refreshInterval = null;
+
+        // Login form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (username === 'admin' && password === 'password') {
+                // Login successful
+                isLoggedIn = true;
+                loginContainer.style.display = 'none';
+                adminDashboard.style.display = 'block';
+                logoutButton.style.display = 'block';
+                headerTitle.textContent = 'Admin Support';
+                
+                // Initialize socket connection
+                initializeSocket();
+                
+                // Start auto-refresh
+                startAutoRefresh();
+            } else {
+                alert('Invalid credentials. Try admin/password');
+            }
+        });
+
+        // Logout
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            isLoggedIn = false;
+            loginContainer.style.display = 'block';
+            adminDashboard.style.display = 'none';
+            logoutButton.style.display = 'none';
+            headerTitle.textContent = 'Admin Portal';
+            
+            // Disconnect socket
+            if (socket) {
+                socket.disconnect();
+            }
+            
+            // Clear auto-refresh
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        });
+
+        // Back to chats button
+        backToChats.addEventListener('click', function(e) {
+            e.preventDefault();
+            showChatList();
+        });
+
+        // Initialize Socket.io
+        function initializeSocket() {
+            socket = io();
+            
+            // Authenticate as admin
+            socket.emit('authenticate', 'admin');
+            
+            // Listen for chat history
+            socket.on('chat_history', function(userMessages) {
+                // Process chat history
+                processUserMessages(userMessages);
+            });
+            
+            // Listen for new messages
+            socket.on('chat message', function(data) {
+                // Update chat list if needed
+                updateChatList(data);
+                
+                // If this chat is currently active, add the message to the UI
+                if (activeUserId === data.userId) {
+                    addMessageToActiveChatUI(data.sender, data.message, data.timestamp);
+                    
+                    // Mark as read
+                    markMessageAsRead(data.id);
+                }
+            });
+            
+            // Listen for latest messages
+            socket.on('latest_messages', function(userMessages) {
+                // Process latest messages
+                processUserMessages(userMessages);
+            });
+        }
+
+        // Process user messages from server
+        function processUserMessages(userMessages) {
+            // Clear existing chats
+            chats = [];
+            
+            // Process each user's messages
+            for (const userId in userMessages) {
+                if (userMessages.hasOwnProperty(userId)) {
+                    const messages = userMessages[userId];
+                    
+                    if (messages.length > 0) {
+                        // Find user info
+                        const lastMessage = messages[messages.length - 1];
+                        const username = lastMessage.username || `User ${userId.split('_')[1] || userId}`;
+                        
+                        // Count unread messages
+                        const unreadCount = messages.filter(msg => !msg.read && msg.sender === 'user').length;
+                        
+                        // Add to chats array
+                        chats.push({
+                            userId: userId,
+                            username: username,
+                            status: 'active',
+                            lastMessage: lastMessage.message,
+                            time: formatTime(lastMessage.timestamp),
+                            unread: unreadCount,
+                            messages: messages.map(msg => ({
+                                id: msg.id,
+                                sender: msg.sender,
+                                message: msg.message,
+                                time: formatTime(msg.timestamp),
+                                read: msg.read
+                            }))
+                        });
+                    }
+                }
+            }
+            
+            // Re-render chat list
+            renderChatList();
+        }
+
+        // Format timestamp to readable time
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Unknown';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            
+            // If today, show time
+            if (date.toDateString() === now.toDateString()) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            // If this year, show date and month
+            if (date.getFullYear() === now.getFullYear()) {
+                return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            }
+            
+            // Otherwise show full date
+            return date.toLocaleDateString();
+        }
+
+        // Start auto-refresh for chat list
+        function startAutoRefresh() {
+            refreshInterval = setInterval(function() {
+                // Request latest messages from server
+                socket.emit('get_latest_messages');
+            }, 3000);
+        }
+
+        // Update chat list with new message
+        function updateChatList(data) {
+            const existingChatIndex = chats.findIndex(chat => chat.userId === data.userId);
+            
+            if (existingChatIndex >= 0) {
+                // Update existing chat
+                chats[existingChatIndex].lastMessage = data.message;
+                chats[existingChatIndex].time = formatTime(data.timestamp);
+                chats[existingChatIndex].messages.push({
+                    id: data.id,
+                    sender: data.sender,
+                    message: data.message,
+                    time: formatTime(data.timestamp),
+                    read: activeUserId === data.userId // Mark as read if currently viewing this chat
+                });
+                
+                // Update unread count
+                if (data.sender === 'user' && activeUserId !== data.userId) {
+                    chats[existingChatIndex].unread++;
+                }
+            } else {
+                // Add new chat
+                chats.push({
+                    userId: data.userId,
+                    username: data.username || `User ${data.userId.split('_')[1] || data.userId}`,
+                    status: 'active',
+                    lastMessage: data.message,
+                    time: formatTime(data.timestamp),
+                    unread: data.sender === 'user' ? 1 : 0,
+                    messages: [{
+                        id: data.id,
+                        sender: data.sender,
+                        message: data.message,
+                        time: formatTime(data.timestamp),
+                        read: false
+                    }]
+                });
+            }
+            
+            // Re-render chat list
+            renderChatList();
+        }
+
+        // Render chat list
+        function renderChatList() {
+            // Clear no chats message if we have chats
+            if (chats.length > 0) {
+                const noChatsMessage = chatList.querySelector('.no-chats-message');
+                if (noChatsMessage) {
+                    noChatsMessage.style.display = 'none';
+                }
+            }
+            
+            // Remove existing chat items
+            const existingItems = chatList.querySelectorAll('.chat-item');
+            existingItems.forEach(item => item.remove());
+            
+            // Add chat items
+            chats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${activeUserId === chat.userId ? 'active' : ''}`;
+                chatItem.dataset.userId = chat.userId;
+                
+                const statusClass = chat.status === 'active' ? 'status-active' : 
+                                   chat.status === 'waiting' ? 'status-waiting' : 'status-closed';
+                
+                chatItem.innerHTML = `
+                    <div class="chat-item-header">
+                        <div class="chat-user">
+                            <i class="fas fa-user"></i>
+                            <span>${chat.username}</span>
+                            ${chat.unread > 0 ? `<span class="unread-badge">${chat.unread}</span>` : ''}
+                        </div>
+                        <span class="chat-time">${chat.time}</span>
+                    </div>
+                    <p class="chat-preview">${chat.lastMessage}</p>
+                    <div class="chat-status">
+                        <span class="status-badge ${statusClass}">${chat.status}</span>
+                    </div>
+                `;
+                
+                chatItem.addEventListener('click', function() {
+                    selectChat(chat.userId);
+                });
+                
+                chatList.appendChild(chatItem);
+            });
+        }
+
+        // Select a chat
+        function selectChat(userId) {
+            activeUserId = userId;
+            
+            // Update active class in chat list
+            document.querySelectorAll('.chat-item').forEach(item => {
+                if (item.dataset.userId === userId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Show active chat and hide no-chat-selected
+            noChatSelected.style.display = 'none';
+            activeChat.style.display = 'flex';
+            
+            // Find the selected chat
+            const selectedChat = chats.find(chat => chat.userId === userId);
+            
+            if (selectedChat) {
+                // Reset unread count
+                selectedChat.unread = 0;
+                
+                // Hide chat sidebar on mobile
+                if (window.innerWidth < 768) {
+                    chatSidebar.style.display = 'none';
+                    backToChats.style.display = 'block';
+                    backToSupport.style.display = 'none';
+                }
+                
+                // Render chat header
+                activeChatHeader.innerHTML = `
+                    <div class="user-info">
+                        <h2>${selectedChat.username}</h2>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="btn-success"><i class="fas fa-check-circle"></i> Resolve</button>
+                        <button class="btn-danger"><i class="fas fa-times-circle"></i> Close</button>
+                    </div>
+                `;
+                
+                // Render chat messages
+                renderChatMessages(selectedChat.messages);
+                
+                // Mark all messages as read
+                selectedChat.messages.forEach(msg => {
+                    if (!msg.read && msg.sender === 'user') {
+                        msg.read = true;
+                        markMessageAsRead(msg.id);
+                    }
+                });
+                
+                // Re-render chat list to update unread badges
+                renderChatList();
+            }
+        }
+
+        // Show chat list (for mobile)
+        function showChatList() {
+            chatSidebar.style.display = 'flex';
+            activeChat.style.display = 'none';
+            noChatSelected.style.display = 'flex';
+            backToChats.style.display = 'none';
+            backToSupport.style.display = 'block';
+            activeUserId = null;
+        }
+
+        // Render chat messages
+        function renderChatMessages(messages) {
+            activeChatMessages.innerHTML = '';
+            
+            messages.forEach(msg => {
+                addMessageToActiveChatUI(msg.sender, msg.message, msg.time);
+            });
+            
+            // Scroll to bottom
+            activeChatMessages.scrollTop = activeChatMessages.scrollHeight;
+        }
+
+        // Add message to active chat UI
+        function addMessageToActiveChatUI(sender, text, time = null) {
+            const messageDiv = document.createElement('div');
+            // Updated to match user page styling - user messages on left, admin on right
+            messageDiv.className = sender === 'user' ? 'message user-message' : 'message admin-message';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            const textP = document.createElement('p');
+            textP.className = 'message-text';
+            textP.textContent = text;
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'message-time';
+            timeSpan.textContent = time || 'Just now';
+            
+            messageContent.appendChild(textP);
+            messageContent.appendChild(timeSpan);
+            messageDiv.appendChild(messageContent);
+            
+            activeChatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            activeChatMessages.scrollTop = activeChatMessages.scrollHeight;
+        }
+
+        // Mark message as read
+        function markMessageAsRead(messageId) {
+            socket.emit('mark_read', {
+                messageId: messageId
+            });
+        }
+
+        // Send message as admin
+        function sendAdminMessage() {
+            const message = adminMessageInput.value.trim();
+            
+            if (message && activeUserId) {
+                // Add message to UI
+                addMessageToActiveChatUI('admin', message);
+                
+                // Send to server
+                socket.emit('chat message', {
+                    userId: activeUserId,
+                    message: message,
+                    sender: 'admin'
+                });
+                
+                // Update chat in the list
+                const chatIndex = chats.findIndex(chat => chat.userId === activeUserId);
+                if (chatIndex >= 0) {
+                    chats[chatIndex].lastMessage = message;
+                    chats[chatIndex].time = 'Just now';
+                    chats[chatIndex].messages.push({
+                        sender: 'admin',
+                        message: message,
+                        time: 'Just now',
+                        read: true
+                    });
+                }
+                
+                // Re-render chat list
+                renderChatList();
+                
+                // Clear input
+                adminMessageInput.value = '';
+            }
+        }
+
+        // Event listeners
+        adminSendButton.addEventListener('click', sendAdminMessage);
+        
+        adminMessageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendAdminMessage();
+            }
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            document.querySelectorAll('.chat-item').forEach(item => {
+                const username = item.querySelector('.chat-user span').textContent.toLowerCase();
+                const message = item.querySelector('.chat-preview').textContent.toLowerCase();
+                
+                if (username.includes(searchTerm) || message.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                chatSidebar.style.display = 'flex';
+                backToChats.style.display = 'none';
+                backToSupport.style.display = 'block';
+            } else if (activeUserId) {
+                chatSidebar.style.display = 'none';
+                backToChats.style.display = 'block';
+                backToSupport.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coinbase Support</title>
+    <link rel="stylesheet" href="stylesg.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header support-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="back-link">
+                    <a href="index.html"><i class="fas fa-arrow-left"></i></a>
+                </div>
+                <div class="logo">
+                    <h1>Coinbase Support</h1>
+                </div>
+                <div class="empty-space"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="support-main">
+        <div class="container">
+            <div class="support-container">
+                <div class="support-header-section">
+                    <h1>Customer Support</h1>
+                    <p>Get help from our support team</p>
+                </div>
+
+                <div class="support-content">
+                    <div class="common-questions">
+                        <h2>Common Questions</h2>
+                        <div class="question-list">
+                            <div class="question-item">How do I reset my password?</div>
+                            <div class="question-item">Why is my transaction pending?</div>
+                            <div class="question-item">How do I verify my identity?</div>
+                            <div class="question-item">Where can I see my transaction history?</div>
+                        </div>
+                    </div>
+
+                    <div class="live-chat">
+                        <h2>Live Support Chat</h2>
+                        <div class="chat-container modern-chat">
+                            <div class="chat-header">
+                                <div class="chat-header-info">
+                                    <div class="chat-avatar">
+                                        <i class="fas fa-headset"></i>
+                                    </div>
+                                    <div>
+                                        <p class="chat-title">Support Agent</p>
+                                        <p class="chat-status online">Online</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="chat-messages" id="chat-messages">
+                                <div class="message support-message">
+                                    <div class="message-content">
+                                        <p class="message-text">Hello! How can I help you today?</p>
+                                        <span class="message-time">Just now</span>
+                                    </div>
+                                </div>
+                                <!-- Messages will be added here dynamically -->
+                            </div>
+
+                            <div class="chat-input">
+                                <input type="text" id="message-input" placeholder="Type your message...">
+                                <button id="send-button" type="button"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="admin-link">
+                            <a href="admin.html"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer support-footer">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> Coinbase. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Chat functionality
+        const socket = io();
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        
+        // Generate a random user ID for this session or use existing one from localStorage
+        let userId = localStorage.getItem('coinbase_chat_user_id');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('coinbase_chat_user_id', userId);
+        }
+        
+        // Authenticate with the server
+        socket.emit('authenticate', userId);
+        
+        // Send message function
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                // Add message to UI
+                addMessageToUI('user', message);
+                
+                // Send to server
+                socket.emit('chat message', {
+                    userId: userId,
+                    message: message,
+                    sender: 'user'
+                });
+                
+                // Clear input
+                messageInput.value = '';
+            }
+        }
+        
+        // Add message to UI
+        function addMessageToUI(sender, text, time = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender === 'user' ? 'message user-message' : 'message support-message';
+            
+            const now = time ? new Date(time) : new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                              now.getMinutes().toString().padStart(2, '0');
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            const textP = document.createElement('p');
+            textP.className = 'message-text';
+            textP.textContent = text;
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'message-time';
+            timeSpan.textContent = timeString;
+            
+            messageContent.appendChild(textP);
+            messageContent.appendChild(timeSpan);
+            messageDiv.appendChild(messageContent);
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Listen for messages from server
+        socket.on('chat message', function(data) {
+            if (data.userId === userId && data.sender === 'admin') {
+                addMessageToUI('support', data.message, data.timestamp);
+            }
+        });
+        
+        // Listen for chat history
+        socket.on('chat_history', function(messages) {
+            // Clear existing messages except the welcome message
+            while (chatMessages.children.length > 1) {
+                chatMessages.removeChild(chatMessages.lastChild);
+            }
+            
+            // Add messages to UI
+            if (Array.isArray(messages)) {
+                messages.forEach(msg => {
+                    addMessageToUI(msg.sender === 'user' ? 'user' : 'support', msg.message, msg.timestamp);
+                });
+            }
+        });
+        
+        // Handle common questions
+        const questionItems = document.querySelectorAll('.question-item');
+        questionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                messageInput.value = this.textContent;
+                sendMessage();
+            });
+        });
+    </script>
+</body>
+</html>
